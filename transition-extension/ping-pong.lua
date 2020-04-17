@@ -1,7 +1,8 @@
 -- transition extension - author: Danny Glover - copyright © Danny Glover 2020 - license: GNU General Public License v3.0
 
+local cwd = (...):match("(.+)%.[^%.]+$") or (...)
 local json = require("json")
-local utils = require("transition-extension.transition-utils")
+local utils = require(cwd .. ".transition-utils")
 local M = {}
 local jDecode = json.decode
 local copyTable = utils.copyTable
