@@ -1,6 +1,8 @@
 # Solar2D-TransitionExtension
 Transition Extension library for Solar2D. Adds new transition methods to the existing library. You simply require the module in your `main.lua` like so: `local transitionExtension = require("transition-extension.extension-transition")` and the methods below will be available to be called via the built-in `transition` module.
 
+There is a demo included in the project. Just open the cloned root folder in the simulator to run it (or click on main.lua via the simulator on windows).
+
 # New transition functions
 
 * `transition.pingPong()` - Used to "ping pong" between two values, the properties in the options table and back to the objects original values.
