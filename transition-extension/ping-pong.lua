@@ -8,13 +8,14 @@ local jDecode = json.decode
 local copyTable = utils.copyTable
 
 local function loopsComplete(tag, currentLoops, requiredLoops, onComplete)
-	if (currentLoops > 0 and currentLoops >= requiredLoops) then
+	if (requiredLoops > -1 and currentLoops >= requiredLoops) then
 		transition.cancel(tag)
 
 		if (type(onComplete) == "function") then
 			onComplete()
-			return true
 		end
+
+		return true
 	end
 end
 
@@ -23,41 +24,50 @@ function M.tween(target, options)
 	local origOptions = copyTable(options)
 	local initialDelay = options.initialDelay or 0
 	local tweenDelay = options.delay or 0
-	local requiredLoops = options.loops or 0
+	local requiredLoops = options.loops or -1
 	local currentLoops = 0
-	local onComplete = options.onComplete
+	local origOnComplete = options.onComplete
 	local onBackward = nil
 	local onForward = nil
 	local tag = options.tag or tostring(target)
 
-	local function updateOptions(onComplete)
-		options.tag = tag
-		options.delay = tweenDelay
-		options.onComplete = onComplete
+	local function updateOptions(opt, onComplete)
+		opt.tag = tag
+		opt.delay = tweenDelay
+		opt.loops = requiredLoops
+		opt.onComplete = onComplete
 	end
 
 	onBackward = function()
+		local opt = {}
+
+		for k, v in pairs(options) do
+			opt[k] = v
+		end
+
 		for k, v in pairs(origTarget) do
 			if (type(v) == "number") then
-				options[k] = v
+				opt[k] = v
 			end
 		end
 
-		currentLoops = currentLoops + 1
+		if (requiredLoops > -1) then
+			currentLoops = currentLoops + 1
+		end
 
-		updateOptions(onForward)
-		transition.to(target, options)
+		updateOptions(opt, onForward)
+		transition.to(target, opt)
 	end
 
 	onForward = function()
-		options = origOptions
+		local opt = copyTable(origOptions)
+		updateOptions(opt, onBackward)
 
-		if (loopsComplete(tag, currentLoops, requiredLoops, onComplete)) then
+		if (loopsComplete(tag, currentLoops, requiredLoops, origOnComplete)) then
 			return
 		end
 
-		updateOptions(onBackward)
-		transition.to(target, origOptions)
+		transition.to(target, opt)
 	end
 
 	options.tag = tag
